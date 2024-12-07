@@ -12,7 +12,7 @@
 * Output Handling - Completed
 * Topo Sort - Completed
 * Fluctuations - Completed
-* Further Optimization
+* Further Optimization - Current!!
 
 ### Code info:
 * processWafer, processMachines, processStepData are used to parse the given data in json file into respective Models
