@@ -12,8 +12,10 @@
 * Output Handling - Completed
 * Topo Sort - Completed
 * Fluctuations - Completed
-* Further Optimization - Current!!
+* Further Optimization - Completed
+* Validate Optimization - Current
 
 ### Code info:
 * processWafer, processMachines, processStepData are used to parse the given data in json file into respective Models
 * Three Dictionaries are used to handle wafer, steps and machines with keys being their respective id and value being their Object
+* In main function, optimize block has been mark by comments. 
