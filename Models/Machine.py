@@ -8,6 +8,8 @@ class Machine:
         self.fluctuations=fluctuations
         self.capacity=capacity
         self.isIdle=True
-
+        self.prev_start_time=None
+        self.prev_end_time=None
+        
     def incrementCurrentWafer(self):
         self.current_wafer_count+=1   

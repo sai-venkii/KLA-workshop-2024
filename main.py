@@ -43,6 +43,7 @@ def addSchedule(wafer_id,step,machine,start_time,end_time):
     })
 
 def handleWafer(wafer,wafer_id,start_time,end_time):
+    current_end_time=0
     for step in wafer.sequence:
         step_time=wafer.steps[step]
         machines=Step_dictionary[step].machines
@@ -50,7 +51,17 @@ def handleWafer(wafer,wafer_id,start_time,end_time):
             targetmachine=Machine_dictionary[machine]
             if(targetmachine.isIdle):
                 targetmachine.incrementCurrentWafer()
+                prev_start_time=targetmachine.prev_start_time
+                prev_end_time=targetmachine.prev_end_time
                 start_time=end_time
+                # Optimize BEGIN
+                if(prev_start_time!=None):
+                    if(start_time>prev_end_time):
+                        if(current_end_time>prev_end_time):
+                            start_time=current_end_time
+                        else:
+                            start_time=prev_end_time
+                #END
                 if(targetmachine.current_wafer_count%targetmachine.capacity ==0):
                     for key,value in targetmachine.current_parameters.items():
                         targetmachine.current_parameters[key]+=targetmachine.fluctuations[key]
@@ -65,6 +76,10 @@ def handleWafer(wafer,wafer_id,start_time,end_time):
                     targetmachine.current_parameters=targetmachine.initial_parameters
                     start_time+=targetmachine.cooldown_time
                 end_time=start_time+step_time
+                print(f"{start_time},{end_time},{prev_start_time},{prev_end_time}")
+                current_end_time=end_time
+                targetmachine.prev_start_time=start_time
+                targetmachine.prev_end_time=end_time
                 addSchedule(f"{wafer.type}-{wafer_id}",step,targetmachine.id,start_time,end_time)
                 break
     return start_time,end_time
@@ -81,7 +96,6 @@ def determineSchedule():
         for wafer_id in range(1,quantity+1):
             start_time,end_time=handleWafer(wafer,wafer_id,start_time,end_time)
 
-
 if __name__ == "__main__":
     milestone_num=str(input("Enter your Milestone: "))
     FILE_NAME=f"Input/Milestone{milestone_num}.json"
@@ -92,7 +106,8 @@ if __name__ == "__main__":
     processWafer(data["wafers"])
     # print(Wafer_dictionary)
     determineSchedule()
-    writeToFile(milestone_num)
     print(final_schedule)
+    # optimize()
+    writeToFile(milestone_num)
     # printStepData()
     # print(data["steps"])
