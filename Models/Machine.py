@@ -4,6 +4,7 @@ class Machine:
         self.current_wafer_count=0
         self.cooldown_time=cooldown_time
         self.initial_parameters=initial_parameters
+        self.current_parameters=initial_parameters
         self.fluctuations=fluctuations
         self.capacity=capacity
         self.isIdle=True

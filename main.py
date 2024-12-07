@@ -51,6 +51,10 @@ def handleWafer(wafer,wafer_id,start_time,end_time):
             targetmachine=Machine_dictionary[machine]
             if(targetmachine.isIdle):
                 start_time=end_time
+                if(targetmachine.current_wafer_count == targetmachine.capacity):
+                    for key,value in targetmachine.current_parameters.items():
+                        targetmachine.current_parameters[key]+=targetmachine.fluctuations[key]
+                
                 targetmachine.incrementCurrentWafer()
                 end_time+=step_time
                 addSchedule(f"{wafer.type}-{wafer_id}",step,targetmachine.id,start_time,end_time)
