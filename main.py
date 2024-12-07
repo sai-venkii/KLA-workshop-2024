@@ -30,7 +30,7 @@ def processMachines(machine_data):
 def processWafer(wafer_data):
     for wafer in wafer_data:
         Wafer_dictionary[wafer["type"]]=Wafer(wafer["type"],wafer["processing_times"],wafer["quantity"])
-
+        Wafer_dictionary[wafer["type"]].topoSort(Step_dictionary)
 
 final_schedule={"schedule":[]}
 def addSchedule(wafer_id,step,machine,start_time,end_time):
@@ -42,25 +42,32 @@ def addSchedule(wafer_id,step,machine,start_time,end_time):
         "end_time":end_time
     })
 
-
-
 def handleWafer(wafer,wafer_id,start_time,end_time):
-    for step,step_time in wafer.steps.items():
+    for step in wafer.sequence:
+        step_time=wafer.steps[step]
         machines=Step_dictionary[step].machines
         for machine in machines:
             targetmachine=Machine_dictionary[machine]
             if(targetmachine.isIdle):
+                targetmachine.incrementCurrentWafer()
                 start_time=end_time
-                if(targetmachine.current_wafer_count == targetmachine.capacity):
+                if(targetmachine.current_wafer_count%targetmachine.capacity ==0):
                     for key,value in targetmachine.current_parameters.items():
                         targetmachine.current_parameters[key]+=targetmachine.fluctuations[key]
-                
-                targetmachine.incrementCurrentWafer()
-                end_time+=step_time
+                ideal_parameters=Step_dictionary[step].parameters
+                machine_parameters=targetmachine.current_parameters
+                isSafeToProcess=True
+                for key,value in machine_parameters.items():
+                    if(value>ideal_parameters[key][1] or value<ideal_parameters[key][0]):
+                        isSafeToProcess=False
+                        break
+                if(isSafeToProcess==False):
+                    targetmachine.current_parameters=targetmachine.initial_parameters
+                    start_time+=targetmachine.cooldown_time
+                end_time=start_time+step_time
                 addSchedule(f"{wafer.type}-{wafer_id}",step,targetmachine.id,start_time,end_time)
                 break
     return start_time,end_time
-
 
 def writeToFile(milestone_num):
     f=open(f"Output/M{milestone_num}.json","w")
@@ -73,7 +80,6 @@ def determineSchedule():
         quantity=wafer.quantity
         for wafer_id in range(1,quantity+1):
             start_time,end_time=handleWafer(wafer,wafer_id,start_time,end_time)
-    print(final_schedule)
 
 
 if __name__ == "__main__":
@@ -87,5 +93,6 @@ if __name__ == "__main__":
     # print(Wafer_dictionary)
     determineSchedule()
     writeToFile(milestone_num)
+    print(final_schedule)
     # printStepData()
     # print(data["steps"])

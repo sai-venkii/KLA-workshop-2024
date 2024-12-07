@@ -54,9 +54,9 @@
     {
       "type": "W1",
       "processing_times": {
+        "S3": 50,
         "S1": 10,
-        "S2": 10,
-        "S3": 50
+        "S2": 10
       },
       "quantity": 10
     }
